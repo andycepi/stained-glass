@@ -1,0 +1,12 @@
+# Stained Glass Cutlist Generator - Requirements
+#
+# Note: This application uses Tkinter which is included with most Python installations.
+# If Tkinter is not available, install it using your system's package manager:
+#
+# Ubuntu/Debian: sudo apt-get install python3-tk
+# Fedora: sudo dnf install python3-tkinter
+# macOS: Included with Python from python.org
+# Windows: Included with Python
+
+# No additional Python packages required!
+# This is a truly lightweight application using only Python standard library.
