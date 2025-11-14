@@ -267,46 +267,100 @@ You can add decorative elements (not pieces) without the `data-piece-type` attri
 
 ## Editing with SVG Editors
 
-### Inkscape (Free)
+### Adobe Illustrator (Recommended Workflow)
+
+**Problem**: Illustrator doesn't easily preserve custom `data-*` attributes.
+
+**Solution**: Design in Illustrator, then add attributes in a text editor.
+
+**Steps:**
+1. Create your design in Illustrator
+2. File → Save As → SVG
+3. Open the saved SVG in a text editor
+4. Add `data-piece-type` and `data-piece-id` to each shape
+5. Save and load in the app
+
+**Quick tip**: Use our helper script!
+```bash
+python svg_helper.py your_design.svg
+```
+
+This script will interactively guide you through adding attributes to each shape.
+
+### Inkscape (Free - Best for Templates)
+
+**Inkscape preserves custom attributes!** This is the easiest SVG editor for templates.
 
 1. Create your shapes using the rectangle tool
 2. Select each shape
 3. Open XML Editor (Edit → XML Editor)
-4. Add custom attributes:
-   - `data-piece-type`: A
-   - `data-piece-id`: 0
-5. Save as "Plain SVG"
+4. Click on the shape's node
+5. Add custom attributes:
+   - Click "Add" at bottom
+   - Name: `data-piece-type`, Value: `A`
+   - Click "Add" again
+   - Name: `data-piece-id`, Value: `0`
+6. Save as "Plain SVG"
 
-### Adobe Illustrator
+### Text Editor (Most Reliable!)
 
-1. Create your shapes
-2. Select each shape
-3. Open Attributes panel (Window → Attributes)
-4. Add custom attributes (requires scripting)
-5. Export as SVG
+**Best method**: Just edit the SVG file directly in any text editor. The XML structure is simple and human-readable.
 
-### Text Editor (Easiest!)
-
-Just edit the SVG file directly in any text editor. The XML structure is simple and human-readable.
+Works with any text editor:
+- VS Code (recommended - has XML syntax highlighting)
+- Notepad++
+- Sublime Text
+- Even plain Notepad!
 
 ## Troubleshooting
+
+### "Found 0 pieces" (Most Common Issue!)
+
+**Cause**: The SVG doesn't have `data-piece-type` and `data-piece-id` attributes.
+
+**This happens when:**
+- You exported from Illustrator/Photoshop without adding attributes
+- You used "Save As" instead of editing the XML
+- Your SVG editor stripped out the custom attributes
+
+**Solution 1 - Use Helper Script (Easiest):**
+```bash
+python svg_helper.py your_design.svg
+```
+Follow the prompts to add attributes to each shape.
+
+**Solution 2 - Manual Edit:**
+1. Open your SVG in a text editor
+2. Find each `<rect>` or shape you want as a piece
+3. Add these attributes:
+   ```xml
+   data-piece-type="A"
+   data-piece-id="0"
+   ```
+
+**Example Fix:**
+```xml
+<!-- Before (from Illustrator) -->
+<rect x="0.5" y="0" width="1" height="2"/>
+
+<!-- After (add attributes) -->
+<rect x="0.5" y="0" width="1" height="2"
+      data-piece-type="A"
+      data-piece-id="0"/>
+```
 
 ### "Could not load template"
 
 - Check that the file is valid XML
 - Ensure all tags are properly closed
-- Verify the SVG namespace is present
-
-### "Found 0 pieces"
-
-- Make sure pieces have both `data-piece-type` and `data-piece-id` attributes
-- Check attribute spelling (case-sensitive)
+- Verify the SVG namespace is present: `xmlns="http://www.w3.org/2000/svg"`
 
 ### Pieces not appearing correctly
 
 - Verify coordinates are within the viewBox
 - Check that width and height are positive numbers
 - Ensure piece IDs are sequential (0, 1, 2, ...)
+- Check attribute spelling: `data-piece-type` (lowercase, hyphenated)
 
 ## Advanced: Multiple Piece Types
 
