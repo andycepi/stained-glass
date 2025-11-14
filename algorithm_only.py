@@ -4,6 +4,7 @@ Stained Glass Color Distribution Algorithm (without GUI dependencies)
 """
 
 from typing import List, Dict
+import random
 
 
 class PieceType:
@@ -43,26 +44,52 @@ class ColorDistribution:
                               for pt in piece_types}
 
         # Distribute colors across piece types
-        # Strategy: Rotate colors through pieces to ensure even distribution
+        # Strategy: Generate random unique color arrangements for each finished piece
         color_names = [f"Color {i+1}" for i in range(num_colors)]
 
         # Create templates for each finished piece
         templates = []
         piece_type_dict = {pt.name: pt for pt in piece_types}
+        used_arrangements = set()
 
-        for piece_idx in range(num_finished_pieces):
-            template = {}
-            color_offset = piece_idx * total_pieces_per_item
-            piece_position = 0
+        # Maximum attempts to prevent infinite loops
+        max_attempts = num_finished_pieces * 1000
+        attempts = 0
 
-            for pt in piece_types:
-                template[pt.name] = []
-                for i in range(pt.count):
-                    color_idx = (color_offset + piece_position) % num_colors
-                    template[pt.name].append(color_names[color_idx])
-                    piece_position += 1
+        while len(templates) < num_finished_pieces:
+            if attempts >= max_attempts:
+                return {
+                    'error': f"Could not generate {num_finished_pieces} unique arrangements. "
+                            f"Try using more colors or fewer finished pieces."
+                }
+            attempts += 1
 
-            templates.append(template)
+            # Randomly select colors for this finished piece
+            # (select total_pieces_per_item colors from num_colors available)
+            color_subset = random.sample(color_names, total_pieces_per_item)
+
+            # Shuffle the selected colors into positions
+            arrangement = color_subset.copy()
+            random.shuffle(arrangement)
+
+            # Convert to tuple for hashing (to check uniqueness)
+            arrangement_tuple = tuple(arrangement)
+
+            # Check if this arrangement is unique
+            if arrangement_tuple not in used_arrangements:
+                used_arrangements.add(arrangement_tuple)
+
+                # Create template from arrangement
+                template = {}
+                position = 0
+
+                for pt in piece_types:
+                    template[pt.name] = []
+                    for i in range(pt.count):
+                        template[pt.name].append(arrangement[position])
+                        position += 1
+
+                templates.append(template)
 
         # Calculate cutlist (total pieces needed per color)
         cutlist = {color: {pt.name: 0 for pt in piece_types}
