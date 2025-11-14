@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Stained Glass Tennis Court Template -->
+<!-- Edit this file to customize your design -->
+<!--
+  Instructions:
+  - Each piece should have a data-piece-type attribute (A, B, C, etc.)
+  - Each piece should have a data-piece-id for unique identification
+  - Use <rect> for rectangles: x, y, width, height
+  - Use <path> for custom shapes
+  - Coordinates are in inches
+  - The viewBox defines the overall dimensions
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 3 4"
+     width="3in"
+     height="4in">
+
+  <title>Tennis Court - Top Down View</title>
+
+  <!-- Left side lane (B piece) -->
+  <rect id="left-lane"
+        data-piece-type="B"
+        data-piece-id="0"
+        x="0"
+        y="0"
+        width="0.5"
+        height="4"
+        fill="none"
+        stroke="black"
+        stroke-width="0.02"/>
+
+  <!-- Top-left service box (A piece) -->
+  <rect id="service-top-left"
+        data-piece-type="A"
+        data-piece-id="0"
+        x="0.5"
+        y="0"
+        width="1"
+        height="2"
+        fill="none"
+        stroke="black"
+        stroke-width="0.02"/>
+
+  <!-- Top-right service box (A piece) -->
+  <rect id="service-top-right"
+        data-piece-type="A"
+        data-piece-id="1"
+        x="1.5"
+        y="0"
+        width="1"
+        height="2"
+        fill="none"
+        stroke="black"
+        stroke-width="0.02"/>
+
+  <!-- Bottom-left service box (A piece) -->
+  <rect id="service-bottom-left"
+        data-piece-type="A"
+        data-piece-id="2"
+        x="0.5"
+        y="2"
+        width="1"
+        height="2"
+        fill="none"
+        stroke="black"
+        stroke-width="0.02"/>
+
+  <!-- Bottom-right service box (A piece) -->
+  <rect id="service-bottom-right"
+        data-piece-type="A"
+        data-piece-id="3"
+        x="1.5"
+        y="2"
+        width="1"
+        height="2"
+        fill="none"
+        stroke="black"
+        stroke-width="0.02"/>
+
+  <!-- Right side lane (B piece) -->
+  <rect id="right-lane"
+        data-piece-type="B"
+        data-piece-id="1"
+        x="2.5"
+        y="0"
+        width="0.5"
+        height="4"
+        fill="none"
+        stroke="black"
+        stroke-width="0.02"/>
+
+  <!-- Optional: Net line (decorative, not a piece) -->
+  <line x1="0.5" y1="2" x2="2.5" y2="2"
+        stroke="gray"
+        stroke-width="0.01"
+        stroke-dasharray="0.1,0.05"/>
+</svg>

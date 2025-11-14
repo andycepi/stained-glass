@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Simple 2x2 Grid Example -->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 2 2"
+     width="2in"
+     height="2in">
+
+  <title>Simple 2x2 Grid</title>
+
+  <!-- Top-left square -->
+  <rect id="square-1"
+        data-piece-type="A"
+        data-piece-id="0"
+        x="0"
+        y="0"
+        width="1"
+        height="1"
+        fill="none"
+        stroke="black"
+        stroke-width="0.02"/>
+
+  <!-- Top-right square -->
+  <rect id="square-2"
+        data-piece-type="A"
+        data-piece-id="1"
+        x="1"
+        y="0"
+        width="1"
+        height="1"
+        fill="none"
+        stroke="black"
+        stroke-width="0.02"/>
+
+  <!-- Bottom-left square -->
+  <rect id="square-3"
+        data-piece-type="A"
+        data-piece-id="2"
+        x="0"
+        y="1"
+        width="1"
+        height="1"
+        fill="none"
+        stroke="black"
+        stroke-width="0.02"/>
+
+  <!-- Bottom-right square -->
+  <rect id="square-4"
+        data-piece-type="A"
+        data-piece-id="3"
+        x="1"
+        y="1"
+        width="1"
+        height="1"
+        fill="none"
+        stroke="black"
+        stroke-width="0.02"/>
+
+</svg>

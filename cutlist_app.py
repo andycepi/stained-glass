@@ -5,9 +5,11 @@ A lightweight desktop app for creating cutlists for stained glass projects
 """
 
 import tkinter as tk
-from tkinter import ttk, scrolledtext, messagebox, Canvas
-from typing import List, Dict, Tuple
+from tkinter import ttk, scrolledtext, messagebox, Canvas, filedialog
+from typing import List, Dict, Tuple, Optional
 import random
+import os
+from template_parser import load_template, TemplatePiece
 
 
 def generate_blue_shades(num_shades: int = 10) -> List[Tuple[str, str]]:
@@ -165,6 +167,17 @@ class CutlistApp:
         self.piece_types = []
         self.color_palette = generate_blue_shades(10)  # 10 shades of blue by default
         self.current_result = None
+        self.template_data = None  # Loaded SVG template
+        self.template_path = None
+
+        # Try to load default template
+        default_template = os.path.join(os.path.dirname(__file__), 'templates', 'tennis_court.svg')
+        if os.path.exists(default_template):
+            try:
+                self.template_data = load_template(default_template)
+                self.template_path = default_template
+            except Exception as e:
+                print(f"Warning: Could not load default template: {e}")
 
         # Create main container
         main_frame = ttk.Frame(root, padding="10")
@@ -201,9 +214,15 @@ class CutlistApp:
         self.num_finished_var = tk.IntVar(value=10)
         ttk.Entry(input_frame, textvariable=self.num_finished_var, width=10).grid(row=3, column=1, sticky=tk.W, padx=5)
 
+        # Template selection
+        ttk.Label(input_frame, text="Design template:").grid(row=4, column=0, sticky=tk.W, pady=5)
+        self.template_label = ttk.Label(input_frame, text="tennis_court.svg", foreground='blue')
+        self.template_label.grid(row=4, column=1, sticky=tk.W, padx=5)
+        ttk.Button(input_frame, text="Load Template...", command=self.load_template).grid(row=4, column=2, padx=5)
+
         # Calculate button
         ttk.Button(input_frame, text="Generate Cutlist", command=self.generate_cutlist,
-                  style='Accent.TButton').grid(row=4, column=0, columnspan=3, pady=10)
+                  style='Accent.TButton').grid(row=5, column=0, columnspan=3, pady=10)
 
         # Create two-column layout for visual display and text results
         # Left column: Visual display
@@ -281,6 +300,27 @@ class CutlistApp:
             ttk.Entry(self.piece_types_frame, textvariable=height_var, width=8).grid(row=i+1, column=3, padx=5, pady=2)
 
             self.piece_type_vars.append((name_var, count_var, width_var, height_var))
+
+    def load_template(self):
+        """Load a custom SVG template"""
+        filename = filedialog.askopenfilename(
+            title="Select SVG Template",
+            filetypes=[("SVG files", "*.svg"), ("All files", "*.*")],
+            initialdir=os.path.join(os.path.dirname(__file__), 'templates')
+        )
+
+        if filename:
+            try:
+                self.template_data = load_template(filename)
+                self.template_path = filename
+                template_name = os.path.basename(filename)
+                self.template_label.config(text=template_name)
+                messagebox.showinfo("Success", f"Template loaded: {template_name}\n\n"
+                                             f"Found {len(self.template_data['pieces'])} pieces:\n" +
+                                             "\n".join(f"  Type {k}: {v} pieces"
+                                                      for k, v in sorted(self.template_data['piece_types'].items())))
+            except Exception as e:
+                messagebox.showerror("Error", f"Could not load template:\n{str(e)}")
 
     def generate_cutlist(self):
         """Generate and display the cutlist"""
@@ -396,89 +436,69 @@ class CutlistApp:
         # Insert into text widget
         self.results_text.insert(tk.END, "\n".join(output))
 
-    def draw_tennis_court(self, canvas: Canvas, x: int, y: int, template: Dict,
-                         color_map: Dict, scale: int = 50) -> int:
+    def draw_from_template(self, canvas: Canvas, x: int, y: int, color_template: Dict,
+                          color_map: Dict, scale: int = 50) -> Tuple[int, int]:
         """
-        Draw a single tennis court with colored pieces.
+        Draw a piece from SVG template with colored pieces.
 
         Args:
             canvas: The canvas to draw on
             x, y: Top-left position
-            template: Color template for this court
+            color_template: Color assignments for this piece (e.g., {'A': ['Blue 1', 'Blue 2'], 'B': [...]})
             color_map: Map of color names to hex values
             scale: Pixels per inch
 
         Returns:
-            Height of the drawn court in pixels
+            (width, height) of the drawn template in pixels
         """
-        # Tennis court layout (assuming standard tennis court piece arrangement):
-        # Left B piece (0.5x4) | Center A pieces in 2x2 grid (each 1x2) | Right B piece (0.5x4)
+        if not self.template_data:
+            # Fallback to default drawing if no template
+            return (150, 200)
 
-        # Get colors for each piece
-        a_colors = template.get('A', [])
-        b_colors = template.get('B', [])
-
-        # Court dimensions
-        court_width = 3.0  # 0.5 + 1 + 1 + 0.5
-        court_height = 4.0
+        template_pieces = self.template_data['pieces']
+        template_width = self.template_data['width']
+        template_height = self.template_data['height']
 
         # Draw border
-        border_width = int(court_width * scale)
-        border_height = int(court_height * scale)
+        border_width = int(template_width * scale)
+        border_height = int(template_height * scale)
         canvas.create_rectangle(x, y, x + border_width, y + border_height,
                               outline='black', width=2)
 
-        # Draw Left B piece (0.5 x 4)
-        if len(b_colors) > 0:
-            b_left_color = color_map.get(b_colors[0], '#cccccc')
-            canvas.create_rectangle(
-                x, y,
-                x + int(0.5 * scale), y + int(4 * scale),
-                fill=b_left_color, outline='black', width=1
-            )
-            # Label
-            canvas.create_text(
-                x + int(0.25 * scale), y + int(2 * scale),
-                text='B', font=('Arial', 10, 'bold'), fill='white'
-            )
+        # Draw each piece from template
+        for piece in template_pieces:
+            piece_type = piece.piece_type
+            piece_id = piece.piece_id
 
-        # Draw Right B piece (0.5 x 4)
-        if len(b_colors) > 1:
-            b_right_color = color_map.get(b_colors[1], '#cccccc')
-            canvas.create_rectangle(
-                x + int(2.5 * scale), y,
-                x + int(3 * scale), y + int(4 * scale),
-                fill=b_right_color, outline='black', width=1
-            )
-            # Label
-            canvas.create_text(
-                x + int(2.75 * scale), y + int(2 * scale),
-                text='B', font=('Arial', 10, 'bold'), fill='white'
-            )
+            # Get color for this piece
+            colors_for_type = color_template.get(piece_type, [])
+            if piece_id < len(colors_for_type):
+                color_name = colors_for_type[piece_id]
+                fill_color = color_map.get(color_name, '#cccccc')
+            else:
+                fill_color = '#cccccc'
 
-        # Draw 4 A pieces in 2x2 grid (each 1x2)
-        a_positions = [
-            (0.5, 0, 1.5, 2),    # Top-left A
-            (1.5, 0, 2.5, 2),    # Top-right A
-            (0.5, 2, 1.5, 4),    # Bottom-left A
-            (1.5, 2, 2.5, 4),    # Bottom-right A
-        ]
-
-        for idx, (x1, y1, x2, y2) in enumerate(a_positions):
-            if idx < len(a_colors):
-                a_color = color_map.get(a_colors[idx], '#cccccc')
+            if piece.shape == 'rect':
+                # Draw rectangle
                 canvas.create_rectangle(
-                    x + int(x1 * scale), y + int(y1 * scale),
-                    x + int(x2 * scale), y + int(y2 * scale),
-                    fill=a_color, outline='black', width=1
-                )
-                # Label
-                canvas.create_text(
-                    x + int((x1 + x2) / 2 * scale), y + int((y1 + y2) / 2 * scale),
-                    text='A', font=('Arial', 12, 'bold'), fill='white'
+                    x + int(piece.x * scale),
+                    y + int(piece.y * scale),
+                    x + int((piece.x + piece.width) * scale),
+                    y + int((piece.y + piece.height) * scale),
+                    fill=fill_color, outline='black', width=1
                 )
 
-        return border_height
+                # Add label
+                center_x = x + int((piece.x + piece.width / 2) * scale)
+                center_y = y + int((piece.y + piece.height / 2) * scale)
+                canvas.create_text(
+                    center_x, center_y,
+                    text=piece_type,
+                    font=('Arial', 12, 'bold'),
+                    fill='white'
+                )
+
+        return (border_width, border_height)
 
     def draw_visual_templates(self, result: Dict, piece_types: List[PieceType]):
         """Draw visual representations of the templates"""
@@ -500,6 +520,14 @@ class CutlistApp:
         margin = 20
         spacing = 30
         templates_per_row = 3
+
+        # Get template dimensions
+        if self.template_data:
+            template_width = self.template_data['width']
+            template_height = self.template_data['height']
+        else:
+            template_width = 3.0
+            template_height = 4.0
 
         y_offset = margin
         x_offset = margin
@@ -542,8 +570,11 @@ class CutlistApp:
             col = idx % templates_per_row
             row = idx // templates_per_row
 
-            x = margin + col * (3 * scale + spacing + 50)
-            y = y_offset + row * (4 * scale + spacing + 40)
+            piece_width_px = int(template_width * scale)
+            piece_height_px = int(template_height * scale)
+
+            x = margin + col * (piece_width_px + spacing + 50)
+            y = y_offset + row * (piece_height_px + spacing + 40)
 
             # Draw title
             self.visual_canvas.create_text(
@@ -553,19 +584,20 @@ class CutlistApp:
                 anchor='nw'
             )
 
-            # Draw court
-            height = self.draw_tennis_court(
+            # Draw from template
+            width, height = self.draw_from_template(
                 self.visual_canvas, x, y, template, color_map, scale
             )
 
         # Update scroll region
         total_rows = (max_templates - 1) // templates_per_row + 1
-        total_height = y_offset + total_rows * (4 * scale + spacing + 40) + margin
+        piece_height_px = int(template_height * scale)
+        total_height = y_offset + total_rows * (piece_height_px + spacing + 40) + margin
         self.visual_canvas.configure(scrollregion=(0, 0, 600, total_height))
 
         if len(templates) > max_templates:
             # Add note about more templates
-            note_y = y_offset + total_rows * (4 * scale + spacing + 40)
+            note_y = y_offset + total_rows * (piece_height_px + spacing + 40)
             self.visual_canvas.create_text(
                 margin, note_y,
                 text=f"... and {len(templates) - max_templates} more templates",

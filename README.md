@@ -4,12 +4,14 @@ A lightweight desktop application for creating optimized cutlists for stained gl
 
 ## Features
 
-- **Visual Tennis Court Diagrams**: See your stained glass tennis courts with actual colors!
+- **Editable SVG Templates**: Create custom designs by editing simple SVG files!
+- **Visual Diagrams**: See your stained glass designs with actual colors
 - **10 Shades of Blue**: Beautiful gradient from light to dark blue (customizable)
 - **Multi-piece type support**: Define different types of glass pieces (A, B, C, etc.) with custom dimensions
 - **Smart color distribution**: Randomly generates unique color arrangements ensuring no color repeats in any finished piece
 - **Optimal balancing**: Min-max algorithm for efficient distribution across colors
 - **Interactive GUI**: Two-panel layout with visual templates and detailed cutlist data
+- **Template Library**: Includes tennis court and simple grid examples
 - **Scrollable gallery**: View multiple finished piece templates side-by-side
 - **Color legend**: Visual color palette showing all available shades
 
@@ -172,13 +174,43 @@ Finished Piece #2:
 - **Even distribution**: The more colors you have, the more evenly distributed the cutting will be
 - **Piece dimensions**: Use consistent units (inches recommended) for width and height
 
+## Custom Templates
+
+**Create your own designs!** The app uses editable SVG template files that you can customize:
+
+### Using Templates
+
+1. **Load a template**: Click "Load Template..." in the app
+2. **View the design**: See your custom layout with colors
+3. **Generate cutlist**: Get the cutting instructions
+
+### Creating Custom Templates
+
+Templates are simple SVG files. See [templates/TEMPLATE_GUIDE.md](templates/TEMPLATE_GUIDE.md) for a complete guide.
+
+**Quick Example:**
+```xml
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2">
+  <rect data-piece-type="A" data-piece-id="0" x="0" y="0" width="1" height="1"/>
+  <rect data-piece-type="A" data-piece-id="1" x="1" y="0" width="1" height="1"/>
+  <rect data-piece-type="A" data-piece-id="2" x="0" y="1" width="1" height="1"/>
+  <rect data-piece-type="A" data-piece-id="3" x="1" y="1" width="1" height="1"/>
+</svg>
+```
+
+**Included Templates:**
+- `tennis_court.svg` - Tennis court design (default)
+- `simple_grid.svg` - 2×2 grid example
+
+Edit templates with any text editor or SVG editor (Inkscape, Illustrator, etc.)!
+
 ## Visual Demo
 
 For a detailed description of the visual output with screenshots and examples, see [VISUAL_DEMO.md](VISUAL_DEMO.md).
 
 The visual display includes:
 - Color palette legend with all 10 blue shades
-- Tennis court diagrams showing piece layout
+- Custom design from your SVG template
 - Color-coded pieces matching your cutlist
 - Scrollable gallery of up to 9 templates
 
