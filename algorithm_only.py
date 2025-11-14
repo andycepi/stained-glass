@@ -3,8 +3,31 @@
 Stained Glass Color Distribution Algorithm (without GUI dependencies)
 """
 
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import random
+
+
+def generate_blue_shades(num_shades: int = 10) -> List[Tuple[str, str]]:
+    """
+    Generate shades of blue from light to dark.
+    Returns list of tuples: (name, hex_color)
+    """
+    # Generate shades from light blue to dark blue
+    blues = []
+    for i in range(num_shades):
+        # Interpolate between light blue (173, 216, 230) and dark blue (0, 0, 139)
+        ratio = i / (num_shades - 1) if num_shades > 1 else 0
+
+        # Light blue to dark blue gradient
+        r = int(173 * (1 - ratio) + 0 * ratio)
+        g = int(216 * (1 - ratio) + 0 * ratio)
+        b = int(230 * (1 - ratio) + 139 * ratio)
+
+        hex_color = f"#{r:02x}{g:02x}{b:02x}"
+        name = f"Blue {i+1}"
+        blues.append((name, hex_color))
+
+    return blues
 
 
 class PieceType:
@@ -24,10 +47,17 @@ class ColorDistribution:
 
     @staticmethod
     def calculate_distribution(piece_types: List[PieceType], num_colors: int,
-                              num_finished_pieces: int) -> Dict:
+                              num_finished_pieces: int,
+                              color_palette: List[Tuple[str, str]] = None) -> Dict:
         """
         Calculate color distribution ensuring no color repeats in a finished piece.
         Returns distribution plan and templates for each finished piece.
+
+        Args:
+            piece_types: List of piece types
+            num_colors: Number of colors to use
+            num_finished_pieces: Number of finished pieces to create
+            color_palette: Optional list of (name, hex_color) tuples
         """
         # Calculate total pieces per finished item
         total_pieces_per_item = sum(pt.count for pt in piece_types)
@@ -43,9 +73,14 @@ class ColorDistribution:
         total_pieces_needed = {pt.name: pt.count * num_finished_pieces
                               for pt in piece_types}
 
-        # Distribute colors across piece types
-        # Strategy: Generate random unique color arrangements for each finished piece
-        color_names = [f"Color {i+1}" for i in range(num_colors)]
+        # Use provided color palette or generate default names
+        if color_palette:
+            color_info = color_palette[:num_colors]
+            color_names = [name for name, _ in color_info]
+            color_map = {name: hex_color for name, hex_color in color_info}
+        else:
+            color_names = [f"Color {i+1}" for i in range(num_colors)]
+            color_map = {name: None for name in color_names}
 
         # Create templates for each finished piece
         templates = []
@@ -110,5 +145,6 @@ class ColorDistribution:
             'total_pieces_per_item': total_pieces_per_item,
             'min_pieces_per_color': min_pieces,
             'max_pieces_per_color': max_pieces,
-            'piece_types': piece_type_dict
+            'piece_types': piece_type_dict,
+            'color_map': color_map  # Map of color names to hex values
         }

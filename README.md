@@ -4,11 +4,14 @@ A lightweight desktop application for creating optimized cutlists for stained gl
 
 ## Features
 
+- **Visual Tennis Court Diagrams**: See your stained glass tennis courts with actual colors!
+- **10 Shades of Blue**: Beautiful gradient from light to dark blue (customizable)
 - **Multi-piece type support**: Define different types of glass pieces (A, B, C, etc.) with custom dimensions
-- **Smart color distribution**: Automatically calculates color distribution ensuring no color repeats in any finished piece
+- **Smart color distribution**: Randomly generates unique color arrangements ensuring no color repeats in any finished piece
 - **Optimal balancing**: Min-max algorithm for efficient distribution across colors
-- **Visual templates**: Shows color arrangement for each finished piece
-- **Detailed cutlist**: Generates a complete cutting list showing exactly how many pieces of each type to cut from each color
+- **Interactive GUI**: Two-panel layout with visual templates and detailed cutlist data
+- **Scrollable gallery**: View multiple finished piece templates side-by-side
+- **Color legend**: Visual color palette showing all available shades
 
 ## Requirements
 
@@ -72,16 +75,29 @@ chmod +x cutlist_app.py
 
 The application comes pre-configured with a tennis court example:
 
-- **Piece Type A**: 4 pieces per court (1" x 2" rectangles)
-- **Piece Type B**: 2 pieces per court (0.5" x 4" rectangles)
+- **Piece Type A**: 4 pieces per court (1" x 2" rectangles) - service boxes
+- **Piece Type B**: 2 pieces per court (0.5" x 4" rectangles) - side lanes
 - **Total pieces per court**: 6
-- **Default colors**: 6
+- **Default colors**: 10 shades of blue
 - **Default finished pieces**: 10
 
-This generates a cutlist showing:
-- Exactly how many of each piece type to cut from each color
-- The color arrangement for each finished tennis court
-- Distribution statistics (min/max pieces per color)
+**Tennis Court Layout (Top-Down View):**
+```
+┌───────┬────────┬────────┬───────┐
+│       │        │        │       │
+│   B   │   A    │   A    │   B   │
+│ 0.5x4 │  1x2   │  1x2   │ 0.5x4 │
+│       ├────────┼────────┤       │
+│       │   A    │   A    │       │
+│       │  1x2   │  1x2   │       │
+└───────┴────────┴────────┴───────┘
+```
+
+This generates:
+- **Visual diagrams**: Color-coded tennis court layouts showing each piece
+- **Cutlist table**: Exactly how many of each piece type to cut from each blue shade
+- **Unique templates**: Each finished court has a different random color arrangement
+- **Distribution statistics**: Min/max pieces per color for optimal cutting
 
 ### Output
 
@@ -155,6 +171,16 @@ Finished Piece #2:
 - **Minimum colors needed**: You need at least as many colors as total pieces per finished item
 - **Even distribution**: The more colors you have, the more evenly distributed the cutting will be
 - **Piece dimensions**: Use consistent units (inches recommended) for width and height
+
+## Visual Demo
+
+For a detailed description of the visual output with screenshots and examples, see [VISUAL_DEMO.md](VISUAL_DEMO.md).
+
+The visual display includes:
+- Color palette legend with all 10 blue shades
+- Tennis court diagrams showing piece layout
+- Color-coded pieces matching your cutlist
+- Scrollable gallery of up to 9 templates
 
 ## Troubleshooting
 
