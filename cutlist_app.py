@@ -249,12 +249,33 @@ class CutlistApp:
         main_frame.columnconfigure(0, weight=1)
         main_frame.columnconfigure(1, weight=1)
 
-        # Results text area
-        self.results_text = scrolledtext.ScrolledText(results_frame, width=60, height=25,
-                                                      font=('Courier', 9))
-        self.results_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        # Results text area with full content display
+        text_container = ttk.Frame(results_frame)
+        text_container.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         results_frame.columnconfigure(0, weight=1)
         results_frame.rowconfigure(0, weight=1)
+
+        self.results_text = scrolledtext.ScrolledText(text_container, width=60, height=30,
+                                                      font=('Courier', 9), wrap=tk.NONE)
+        self.results_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        text_container.columnconfigure(0, weight=1)
+        text_container.rowconfigure(0, weight=1)
+
+        # Horizontal scrollbar for long lines
+        h_scrollbar = ttk.Scrollbar(text_container, orient=tk.HORIZONTAL, command=self.results_text.xview)
+        h_scrollbar.grid(row=1, column=0, sticky=(tk.W, tk.E))
+        self.results_text.configure(xscrollcommand=h_scrollbar.set)
+
+        # Export button
+        button_frame = ttk.Frame(results_frame)
+        button_frame.grid(row=1, column=0, pady=(5, 0))
+        ttk.Button(button_frame, text="Export Cutlist to File...",
+                  command=self.export_cutlist).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Copy to Clipboard",
+                  command=self.copy_to_clipboard).pack(side=tk.LEFT, padx=5)
+
+        # Store full output for export
+        self.full_output_text = ""
 
         # Initialize with default tennis court values
         self.create_piece_type_inputs()
@@ -417,24 +438,61 @@ class CutlistApp:
         output.append(f"{'TOTAL':<15} " + " ".join(piece_counts) + f" {total_all:>7}")
         output.append("")
 
-        # Templates
+        # Templates - Show ALL templates
         output.append("TEMPLATES (Color arrangement for each finished piece):")
         output.append("-" * 80)
 
-        for idx, template in enumerate(result['templates'][:5]):  # Show first 5
+        for idx, template in enumerate(result['templates']):  # Show ALL templates
             output.append(f"\nFinished Piece #{idx + 1}:")
             for pt in piece_types:
                 colors = ", ".join(template[pt.name])
                 output.append(f"  {pt.name}: [{colors}]")
 
-        if len(result['templates']) > 5:
-            output.append(f"\n... and {len(result['templates']) - 5} more finished pieces")
-
         output.append("")
         output.append("=" * 80)
+        output.append(f"Total finished pieces: {len(result['templates'])}")
+        output.append("=" * 80)
+
+        # Store full output for export
+        self.full_output_text = "\n".join(output)
 
         # Insert into text widget
-        self.results_text.insert(tk.END, "\n".join(output))
+        self.results_text.insert(tk.END, self.full_output_text)
+
+    def export_cutlist(self):
+        """Export cutlist to a text file"""
+        if not self.full_output_text:
+            messagebox.showwarning("No Data", "Generate a cutlist first before exporting.")
+            return
+
+        # Ask for save location
+        filename = filedialog.asksaveasfilename(
+            title="Export Cutlist",
+            defaultextension=".txt",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+            initialfile="stained_glass_cutlist.txt"
+        )
+
+        if filename:
+            try:
+                with open(filename, 'w', encoding='utf-8') as f:
+                    f.write(self.full_output_text)
+                messagebox.showinfo("Success", f"Cutlist exported to:\n{filename}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Could not export file:\n{str(e)}")
+
+    def copy_to_clipboard(self):
+        """Copy cutlist to clipboard"""
+        if not self.full_output_text:
+            messagebox.showwarning("No Data", "Generate a cutlist first before copying.")
+            return
+
+        try:
+            self.root.clipboard_clear()
+            self.root.clipboard_append(self.full_output_text)
+            messagebox.showinfo("Success", "Cutlist copied to clipboard!")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not copy to clipboard:\n{str(e)}")
 
     def draw_from_template(self, canvas: Canvas, x: int, y: int, color_template: Dict,
                           color_map: Dict, scale: int = 50) -> Tuple[int, int]:
