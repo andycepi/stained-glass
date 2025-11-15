@@ -618,10 +618,10 @@ class CutlistApp:
         # Update y_offset after legend
         y_offset = legend_y + ((len(self.color_palette) - 1) // 5 + 1) * 25 + spacing
 
-        # Draw templates (show first 9)
-        max_templates = min(9, len(templates))
+        # Draw ALL templates (not just first 9)
+        num_templates = len(templates)
 
-        for idx in range(max_templates):
+        for idx in range(num_templates):
             template = templates[idx]
 
             # Calculate position
@@ -647,21 +647,11 @@ class CutlistApp:
                 self.visual_canvas, x, y, template, color_map, scale
             )
 
-        # Update scroll region
-        total_rows = (max_templates - 1) // templates_per_row + 1
+        # Update scroll region to fit ALL templates
+        total_rows = (num_templates - 1) // templates_per_row + 1
         piece_height_px = int(template_height * scale)
         total_height = y_offset + total_rows * (piece_height_px + spacing + 40) + margin
         self.visual_canvas.configure(scrollregion=(0, 0, 600, total_height))
-
-        if len(templates) > max_templates:
-            # Add note about more templates
-            note_y = y_offset + total_rows * (piece_height_px + spacing + 40)
-            self.visual_canvas.create_text(
-                margin, note_y,
-                text=f"... and {len(templates) - max_templates} more templates",
-                font=('Arial', 10, 'italic'),
-                anchor='nw'
-            )
 
 
 def main():
