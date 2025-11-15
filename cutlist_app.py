@@ -161,7 +161,7 @@ class CutlistApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Stained Glass Cutlist Generator")
-        self.root.geometry("1400x800")
+        self.root.geometry("1600x900")
 
         # Set default values (tennis court example)
         self.piece_types = []
@@ -188,75 +188,60 @@ class CutlistApp:
         # Title
         title_label = ttk.Label(main_frame, text="Stained Glass Cutlist Generator",
                                font=('Arial', 16, 'bold'))
-        title_label.grid(row=0, column=0, columnspan=2, pady=10)
+        title_label.grid(row=0, column=0, columnspan=2, pady=(0, 10))
 
-        # Input section
-        input_frame = ttk.LabelFrame(main_frame, text="Project Parameters", padding="10")
-        input_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=5)
+        # Left sidebar for controls (compact)
+        sidebar = ttk.Frame(main_frame, width=300)
+        sidebar.grid(row=1, column=0, sticky=(tk.W, tk.N, tk.S), padx=(0, 10))
+        sidebar.grid_propagate(False)
+
+        # Input section (compact)
+        input_frame = ttk.LabelFrame(sidebar, text="Settings", padding="8")
+        input_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N), pady=(0, 5))
 
         # Number of piece types
-        ttk.Label(input_frame, text="Number of piece types:").grid(row=0, column=0, sticky=tk.W, pady=5)
+        ttk.Label(input_frame, text="Piece types:", font=('Arial', 8)).grid(row=0, column=0, sticky=tk.W, pady=2)
         self.num_types_var = tk.IntVar(value=2)
-        ttk.Entry(input_frame, textvariable=self.num_types_var, width=10).grid(row=0, column=1, sticky=tk.W, padx=5)
-        ttk.Button(input_frame, text="Set Piece Types", command=self.create_piece_type_inputs).grid(row=0, column=2, padx=5)
+        ttk.Entry(input_frame, textvariable=self.num_types_var, width=8).grid(row=0, column=1, sticky=tk.W, padx=3)
+        ttk.Button(input_frame, text="Set", command=self.create_piece_type_inputs, width=6).grid(row=0, column=2, padx=2)
 
         # Piece types container
         self.piece_types_frame = ttk.Frame(input_frame)
-        self.piece_types_frame.grid(row=1, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=5)
+        self.piece_types_frame.grid(row=1, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=3)
 
         # Number of colors
-        ttk.Label(input_frame, text="Number of colors:").grid(row=2, column=0, sticky=tk.W, pady=5)
+        ttk.Label(input_frame, text="Colors:", font=('Arial', 8)).grid(row=2, column=0, sticky=tk.W, pady=2)
         self.num_colors_var = tk.IntVar(value=10)
-        ttk.Entry(input_frame, textvariable=self.num_colors_var, width=10).grid(row=2, column=1, sticky=tk.W, padx=5)
+        ttk.Entry(input_frame, textvariable=self.num_colors_var, width=8).grid(row=2, column=1, sticky=tk.W, padx=3, columnspan=2)
 
         # Number of finished pieces
-        ttk.Label(input_frame, text="Number of finished pieces:").grid(row=3, column=0, sticky=tk.W, pady=5)
+        ttk.Label(input_frame, text="Finished pieces:", font=('Arial', 8)).grid(row=3, column=0, sticky=tk.W, pady=2)
         self.num_finished_var = tk.IntVar(value=10)
-        ttk.Entry(input_frame, textvariable=self.num_finished_var, width=10).grid(row=3, column=1, sticky=tk.W, padx=5)
+        ttk.Entry(input_frame, textvariable=self.num_finished_var, width=8).grid(row=3, column=1, sticky=tk.W, padx=3, columnspan=2)
 
         # Template selection
-        ttk.Label(input_frame, text="Design template:").grid(row=4, column=0, sticky=tk.W, pady=5)
-        self.template_label = ttk.Label(input_frame, text="tennis_court.svg", foreground='blue')
-        self.template_label.grid(row=4, column=1, sticky=tk.W, padx=5)
-        ttk.Button(input_frame, text="Load Template...", command=self.load_template).grid(row=4, column=2, padx=5)
+        ttk.Label(input_frame, text="Template:", font=('Arial', 8)).grid(row=4, column=0, sticky=tk.W, pady=2)
+        self.template_label = ttk.Label(input_frame, text="tennis_court.svg", foreground='blue', font=('Arial', 8))
+        self.template_label.grid(row=5, column=0, columnspan=3, sticky=tk.W, pady=(0, 2))
+        ttk.Button(input_frame, text="Load Template...", command=self.load_template, width=15).grid(row=6, column=0, columnspan=3, pady=2)
 
-        # Calculate button
+        # Calculate button (prominent)
         ttk.Button(input_frame, text="Generate Cutlist", command=self.generate_cutlist,
-                  style='Accent.TButton').grid(row=5, column=0, columnspan=3, pady=10)
+                  style='Accent.TButton').grid(row=7, column=0, columnspan=3, pady=(8, 0), sticky=(tk.W, tk.E))
 
-        # Create two-column layout for visual display and text results
-        # Left column: Visual display
-        visual_frame = ttk.LabelFrame(main_frame, text="Visual Templates", padding="10")
-        visual_frame.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5, padx=(0, 5))
+        # Cutlist data section (compact, collapsible)
+        cutlist_frame = ttk.LabelFrame(sidebar, text="Cutlist Data", padding="5")
+        cutlist_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(5, 0))
+        sidebar.rowconfigure(1, weight=1)
 
-        # Canvas with scrollbar for visual templates
-        canvas_container = ttk.Frame(visual_frame)
-        canvas_container.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        visual_frame.columnconfigure(0, weight=1)
-        visual_frame.rowconfigure(0, weight=1)
-
-        self.visual_canvas = Canvas(canvas_container, width=600, height=600, bg='white')
-        v_scrollbar = ttk.Scrollbar(canvas_container, orient=tk.VERTICAL, command=self.visual_canvas.yview)
-        self.visual_canvas.configure(yscrollcommand=v_scrollbar.set)
-
-        self.visual_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        v_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-        # Right column: Text results
-        results_frame = ttk.LabelFrame(main_frame, text="Cutlist Data", padding="10")
-        results_frame.grid(row=2, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5)
-        main_frame.rowconfigure(2, weight=1)
-        main_frame.columnconfigure(0, weight=1)
-        main_frame.columnconfigure(1, weight=1)
-
-        # Results text area with full content display
-        text_container = ttk.Frame(results_frame)
+        # Results text area (smaller, compact)
+        text_container = ttk.Frame(cutlist_frame)
         text_container.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        results_frame.columnconfigure(0, weight=1)
-        results_frame.rowconfigure(0, weight=1)
+        cutlist_frame.columnconfigure(0, weight=1)
+        cutlist_frame.rowconfigure(0, weight=1)
 
-        self.results_text = scrolledtext.ScrolledText(text_container, width=60, height=30,
-                                                      font=('Courier', 9), wrap=tk.NONE)
+        self.results_text = scrolledtext.ScrolledText(text_container, width=35, height=20,
+                                                      font=('Courier', 7), wrap=tk.NONE)
         self.results_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         text_container.columnconfigure(0, weight=1)
         text_container.rowconfigure(0, weight=1)
@@ -266,16 +251,39 @@ class CutlistApp:
         h_scrollbar.grid(row=1, column=0, sticky=(tk.W, tk.E))
         self.results_text.configure(xscrollcommand=h_scrollbar.set)
 
-        # Export button
-        button_frame = ttk.Frame(results_frame)
-        button_frame.grid(row=1, column=0, pady=(5, 0))
-        ttk.Button(button_frame, text="Export Cutlist to File...",
-                  command=self.export_cutlist).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="Copy to Clipboard",
-                  command=self.copy_to_clipboard).pack(side=tk.LEFT, padx=5)
+        # Export buttons (compact)
+        button_frame = ttk.Frame(cutlist_frame)
+        button_frame.grid(row=1, column=0, pady=(3, 0))
+        ttk.Button(button_frame, text="Export...",
+                  command=self.export_cutlist, width=12).pack(side=tk.LEFT, padx=2)
+        ttk.Button(button_frame, text="Copy",
+                  command=self.copy_to_clipboard, width=12).pack(side=tk.LEFT, padx=2)
 
         # Store full output for export
         self.full_output_text = ""
+
+        # Main visual display (large, prominent)
+        visual_frame = ttk.LabelFrame(main_frame, text="Visual Design Preview", padding="10")
+        visual_frame.grid(row=1, column=1, sticky=(tk.W, tk.E, tk.N, tk.S))
+        main_frame.rowconfigure(1, weight=1)
+        main_frame.columnconfigure(1, weight=10)  # Give most space to visual
+
+        # Canvas with scrollbar for visual templates
+        canvas_container = ttk.Frame(visual_frame)
+        canvas_container.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        visual_frame.columnconfigure(0, weight=1)
+        visual_frame.rowconfigure(0, weight=1)
+
+        self.visual_canvas = Canvas(canvas_container, bg='white')
+        v_scrollbar = ttk.Scrollbar(canvas_container, orient=tk.VERTICAL, command=self.visual_canvas.yview)
+        h_scrollbar_canvas = ttk.Scrollbar(canvas_container, orient=tk.HORIZONTAL, command=self.visual_canvas.xview)
+        self.visual_canvas.configure(yscrollcommand=v_scrollbar.set, xscrollcommand=h_scrollbar_canvas.set)
+
+        self.visual_canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        v_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        h_scrollbar_canvas.grid(row=1, column=0, sticky=(tk.W, tk.E))
+        canvas_container.columnconfigure(0, weight=1)
+        canvas_container.rowconfigure(0, weight=1)
 
         # Initialize with default tennis court values
         self.create_piece_type_inputs()
@@ -289,11 +297,11 @@ class CutlistApp:
         self.piece_type_vars = []
         num_types = self.num_types_var.get()
 
-        # Header
-        ttk.Label(self.piece_types_frame, text="Type", font=('Arial', 9, 'bold')).grid(row=0, column=0, padx=5)
-        ttk.Label(self.piece_types_frame, text="Count", font=('Arial', 9, 'bold')).grid(row=0, column=1, padx=5)
-        ttk.Label(self.piece_types_frame, text="Width", font=('Arial', 9, 'bold')).grid(row=0, column=2, padx=5)
-        ttk.Label(self.piece_types_frame, text="Height", font=('Arial', 9, 'bold')).grid(row=0, column=3, padx=5)
+        # Header (compact)
+        ttk.Label(self.piece_types_frame, text="T", font=('Arial', 7, 'bold')).grid(row=0, column=0, padx=2)
+        ttk.Label(self.piece_types_frame, text="#", font=('Arial', 7, 'bold')).grid(row=0, column=1, padx=2)
+        ttk.Label(self.piece_types_frame, text="W", font=('Arial', 7, 'bold')).grid(row=0, column=2, padx=2)
+        ttk.Label(self.piece_types_frame, text="H", font=('Arial', 7, 'bold')).grid(row=0, column=3, padx=2)
 
         # Default values for tennis court
         defaults = [
@@ -315,10 +323,10 @@ class CutlistApp:
             width_var = tk.DoubleVar(value=default[2])
             height_var = tk.DoubleVar(value=default[3])
 
-            ttk.Entry(self.piece_types_frame, textvariable=name_var, width=8).grid(row=i+1, column=0, padx=5, pady=2)
-            ttk.Entry(self.piece_types_frame, textvariable=count_var, width=8).grid(row=i+1, column=1, padx=5, pady=2)
-            ttk.Entry(self.piece_types_frame, textvariable=width_var, width=8).grid(row=i+1, column=2, padx=5, pady=2)
-            ttk.Entry(self.piece_types_frame, textvariable=height_var, width=8).grid(row=i+1, column=3, padx=5, pady=2)
+            ttk.Entry(self.piece_types_frame, textvariable=name_var, width=4, font=('Arial', 8)).grid(row=i+1, column=0, padx=2, pady=1)
+            ttk.Entry(self.piece_types_frame, textvariable=count_var, width=4, font=('Arial', 8)).grid(row=i+1, column=1, padx=2, pady=1)
+            ttk.Entry(self.piece_types_frame, textvariable=width_var, width=5, font=('Arial', 8)).grid(row=i+1, column=2, padx=2, pady=1)
+            ttk.Entry(self.piece_types_frame, textvariable=height_var, width=5, font=('Arial', 8)).grid(row=i+1, column=3, padx=2, pady=1)
 
             self.piece_type_vars.append((name_var, count_var, width_var, height_var))
 
@@ -495,7 +503,7 @@ class CutlistApp:
             messagebox.showerror("Error", f"Could not copy to clipboard:\n{str(e)}")
 
     def draw_from_template(self, canvas: Canvas, x: int, y: int, color_template: Dict,
-                          color_map: Dict, scale: int = 50) -> Tuple[int, int]:
+                          color_map: Dict, scale: int = 70) -> Tuple[int, int]:
         """
         Draw a piece from SVG template with colored pieces.
 
@@ -546,13 +554,13 @@ class CutlistApp:
                     fill=fill_color, outline='black', width=1
                 )
 
-                # Add label
+                # Add label (larger font for better visibility)
                 center_x = x + int((piece.x + piece.width / 2) * scale)
                 center_y = y + int((piece.y + piece.height / 2) * scale)
                 canvas.create_text(
                     center_x, center_y,
                     text=piece_type,
-                    font=('Arial', 12, 'bold'),
+                    font=('Arial', 16, 'bold'),
                     fill='white'
                 )
 
@@ -573,10 +581,10 @@ class CutlistApp:
         templates = result['templates']
         color_map = result['color_map']
 
-        # Drawing parameters
-        scale = 50  # pixels per inch
-        margin = 20
-        spacing = 30
+        # Drawing parameters (larger for prominent display)
+        scale = 70  # pixels per inch (increased from 50 for better visibility)
+        margin = 30
+        spacing = 40
         templates_per_row = 3
 
         # Get template dimensions
@@ -594,29 +602,29 @@ class CutlistApp:
         legend_y = y_offset
         self.visual_canvas.create_text(
             x_offset, legend_y,
-            text="Color Palette:", font=('Arial', 12, 'bold'),
+            text="Color Palette:", font=('Arial', 14, 'bold'),
             anchor='nw'
         )
-        legend_y += 25
+        legend_y += 30
 
-        # Draw color swatches
+        # Draw color swatches (larger for better visibility)
         for idx, (color_name, hex_color) in enumerate(self.color_palette):
-            swatch_x = x_offset + (idx % 5) * 110
-            swatch_y = legend_y + (idx // 5) * 25
+            swatch_x = x_offset + (idx % 5) * 120
+            swatch_y = legend_y + (idx // 5) * 30
 
             self.visual_canvas.create_rectangle(
                 swatch_x, swatch_y,
-                swatch_x + 20, swatch_y + 20,
-                fill=hex_color, outline='black'
+                swatch_x + 25, swatch_y + 25,
+                fill=hex_color, outline='black', width=2
             )
             self.visual_canvas.create_text(
-                swatch_x + 25, swatch_y + 10,
-                text=color_name, font=('Arial', 9),
+                swatch_x + 30, swatch_y + 12,
+                text=color_name, font=('Arial', 10),
                 anchor='w'
             )
 
         # Update y_offset after legend
-        y_offset = legend_y + ((len(self.color_palette) - 1) // 5 + 1) * 25 + spacing
+        y_offset = legend_y + ((len(self.color_palette) - 1) // 5 + 1) * 30 + spacing
 
         # Draw ALL templates (not just first 9)
         num_templates = len(templates)
@@ -634,11 +642,11 @@ class CutlistApp:
             x = margin + col * (piece_width_px + spacing + 50)
             y = y_offset + row * (piece_height_px + spacing + 40)
 
-            # Draw title
+            # Draw title (larger for better visibility)
             self.visual_canvas.create_text(
-                x, y - 20,
+                x, y - 25,
                 text=f"Piece #{idx + 1}",
-                font=('Arial', 10, 'bold'),
+                font=('Arial', 12, 'bold'),
                 anchor='nw'
             )
 
@@ -650,8 +658,10 @@ class CutlistApp:
         # Update scroll region to fit ALL templates
         total_rows = (num_templates - 1) // templates_per_row + 1
         piece_height_px = int(template_height * scale)
+        piece_width_px = int(template_width * scale)
+        total_width = margin + templates_per_row * (piece_width_px + spacing + 50) + margin
         total_height = y_offset + total_rows * (piece_height_px + spacing + 40) + margin
-        self.visual_canvas.configure(scrollregion=(0, 0, 600, total_height))
+        self.visual_canvas.configure(scrollregion=(0, 0, total_width, total_height))
 
 
 def main():
